@@ -2,7 +2,63 @@
   <!-- 商品分类导航 -->
   <div class="type-nav">
     <div class="container">
-      <h2 class="all">全部商品分类</h2>
+      <div @mouseleave="outBgc" @mouseenter="isShow">
+        <h2 class="all">全部商品分类</h2>
+        <!-- 三级分类 -->
+        <div class="sort" v-show="sortShow">
+          <div class="all-sort-list2" @click="sortToSearch">
+            <!-- 一级分类 -->
+            <div
+              class="item"
+              v-for="(item1, index) in TypeList"
+              :key="item1.categoryId"
+            >
+              <h3
+                @mouseenter="setBgc(index)"
+                :class="{ bgc: index == indexBgc }"
+              >
+                <a
+                  :data-categoryName="item1.categoryName"
+                  :data-category1Id="item1.categoryId"
+                  >{{ item1.categoryName }}</a
+                >
+              </h3>
+              <div class="item-list clearfix" v-show="index == indexBgc">
+                <div class="subitem">
+                  <!-- 二级分类 -->
+                  <dl
+                    class="fore"
+                    v-for="item2 in item1.categoryChild"
+                    :key="item2.categoryId"
+                  >
+                    <dt>
+                      <a
+                        :data-categoryName="item2.categoryName"
+                        :data-category2Id="item2.categoryId"
+                        >{{ item2.categoryName }}</a
+                      >
+                    </dt>
+                    <dd>
+                      <!-- 三级分类 -->
+                      <em
+                        v-for="item3 in item2.categoryChild"
+                        :key="item3.categoryId"
+                      >
+                        <a
+                          :data-categoryName="item3.categoryName"
+                          :data-category3Id="item3.categoryId"
+                          >{{ item3.categoryName }}</a
+                        >
+                      </em>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <nav class="nav">
         <a href="###">服装城</a>
         <a href="###">美妆馆</a>
@@ -13,63 +69,71 @@
         <a href="###">有趣</a>
         <a href="###">秒杀</a>
       </nav>
-      <div class="sort">
-        <div class="all-sort-list2">
-          <div
-            class="item bo"
-            v-for="item1 in TypeList"
-            :key="item1.categoryId"
-          >
-            <h3>
-              <a href="">{{ item1.categoryName }}</a>
-            </h3>
-            <div class="item-list clearfix">
-              <div class="subitem">
-                <dl
-                  class="fore"
-                  v-for="item2 in item1.categoryChild"
-                  :key="item2.categoryId"
-                >
-                  <dt>
-                    <a href="">{{ item2.categoryName }}</a>
-                  </dt>
-                  <dd>
-                    <em
-                      v-for="item3 in item2.categoryChild"
-                      :key="item3.categoryId"
-                    >
-                      <a href="">{{ item3.categoryName }}</a>
-                    </em>
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-          
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
+import { mapState } from "vuex";
+import throttle from "lodash/throttle";
 export default {
   name: "TypeNav",
-  created() {
-    this.getTypeNavList();
+  data () {
+    return {
+      indexBgc: -1,
+      sortShow: true,
+    };
+  },
+  mounted () {
+    // 非home页面，一进去三级列表不展示
+    if (this.$route.path !== "/home") {
+      this.sortShow = false;
+    }
   },
   computed: {
     ...mapState("home", ["TypeList"]),
   },
   methods: {
-    ...mapActions("home", ["typeList"]),
-    // 初始化请求
-    async getTypeNavList() {
-      try {
-        await this.typeList();
-      } catch (error) {
-        console.log(error);
+
+    // 动态给1级分类添加标签,移入事件
+    setBgc: throttle(function (index) {
+      this.indexBgc = index;
+    }, 100),
+    // 跳转到search页面
+    sortToSearch (event) {
+      let { categoryname, category1id, category2id, category3id } =
+        event.target.dataset;
+      // 如果存在categoryname自定义属性就为a标签
+      if (categoryname) {
+        let location = { name: "search" };
+        let query = { categoryName: categoryname };
+
+        if (category1id) {
+          //利用id分类穿过来的是二级还是三级
+          query.category1Id = category1id;
+        } else if (category2id) {
+          query.category2Id = category2id;
+        } else if (category3id) {
+          query.category3Id = category3id;
+        }
+        location.query = query;
+        // 合并query与params参数
+        let params = JSON.stringify(this.$route.params)
+        if (params !== "{}") {
+          location.params = this.$route.params
+        }
+        this.$router.push(location);
+      }
+    },
+    // 三级分类进入显示
+    isShow () {
+      this.sortShow = true;
+    },
+    // 移出事件，移出归位,隐藏
+    outBgc () {
+      this.indexBgc = -1;
+      if (this.$route.path !== "/home") {
+        this.sortShow = false;
       }
     },
   },
@@ -113,7 +177,6 @@ export default {
       top: 45px;
       width: 210px;
       height: 461px;
-      position: absolute;
       background: #fafafa;
       z-index: 999;
 
@@ -132,8 +195,12 @@ export default {
             }
           }
 
+          .bgc {
+            background-color: skyblue;
+          }
+
           .item-list {
-            display: none;
+            // display: none;
             position: absolute;
             width: 734px;
             min-height: 460px;
@@ -186,14 +253,27 @@ export default {
             }
           }
 
-          &:hover {
-            .item-list {
-              display: block;
-            }
-          }
+          // &:hover {
+          //   .item-list {
+          //     display: block;
+          //   }
+          // }
         }
       }
     }
   }
+}
+
+// 三级分类过渡动画
+@keyframes stor {
+  from {
+    height: 0px;
+  }
+  to {
+    height: 410px;
+  }
+}
+.sort-enter-active {
+  animation: stor 0.2s linear;
 }
 </style>

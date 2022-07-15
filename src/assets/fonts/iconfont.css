@@ -1,0 +1,26 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 3499700 */
+  src: url('iconfont.eot?t=1656942472047'); /* IE9 */
+  src: url('iconfont.eot?t=1656942472047#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('iconfont.woff2?t=1656942472047') format('woff2'),
+       url('iconfont.woff?t=1656942472047') format('woff'),
+       url('iconfont.ttf?t=1656942472047') format('truetype'),
+       url('iconfont.svg?t=1656942472047#iconfont') format('svg');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-arrowup:before {
+  content: "\e7ee";
+}
+
+.icon-arrowdown:before {
+  content: "\e7ef";
+}
+

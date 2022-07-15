@@ -1,24 +1,5 @@
-# project_sph
+<!-- 待完善 -->
 
-## Project setup
-```
-npm install
-```
+###轮播图地址用的 mock 数据，本地地址，使用变量不能用
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+- 解决方法：src 地址直接写变量，但是添加一个自定义指令处理图片加载不出的问题
